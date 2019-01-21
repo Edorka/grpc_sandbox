@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+import "common.proto";
+import "google/api/annotations.proto";
+
+package meteorology;
+
+// A point in the map
+message Coordinates {
+    // Latitude
+    double lat = 1;
+    // Longitude
+    double lon = 2;
+}
+
+message Reading {
+    City city = 1;
+    uint32 time = 2;
+}
+
+message City {
+    uint32 id = 1;
+    string name = 2;
+    string country = 3;
+    Coordinates coords = 4;
+}
