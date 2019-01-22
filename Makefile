@@ -30,3 +30,6 @@ deps:
 
 resources:
 	wget http://bulk.openweathermap.org/sample/hourly_16.json.gz
+
+install:
+	. venv/bin/activate; pip install -Ur requirements.txt
