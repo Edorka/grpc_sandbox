@@ -5,7 +5,7 @@ GATEWAY_FLAGS := -I. -I/usr/local/include -I$(GOPATH)/src/github.com/grpc-ecosys
 GRPC_FLAGS := --python_out=. --grpc_python_out=.
 
 code:
-	python -m grpc_tools.protoc $(GRPC_FLAGS) $(GATEWAY_FLAGS) ./proto/meteorology.proto
+	python -m grpc_tools.protoc $(GRPC_FLAGS) $(GATEWAY_FLAGS) ./proto/*.proto
 
 gw:
 	echo ${GOPATH}

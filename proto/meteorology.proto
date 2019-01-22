@@ -1,6 +1,5 @@
 syntax = "proto3";
 
-import "common.proto";
 import "google/api/annotations.proto";
 
 package meteorology;
@@ -13,9 +12,43 @@ message Coordinates {
     double lon = 2;
 }
 
+message MainData {
+    float temp = 1;
+    float temp_min = 2;
+    float temp_max = 3;
+    float pressure = 4;
+    float sea_level = 5;
+    float grnd_level = 6;
+    float humidity = 7;
+    float temp_kf = 8;
+}
+
+message WindData {
+    float speed = 1;
+    float deg = 2;
+}
+
+message WeatherData {
+    int32 id = 1;
+    string main = 2;
+    string description = 3;
+    string icon = 4;
+}
+
+message Data {
+    //Moment of the reading
+    uint32 dt = 1;
+    //Content
+    MainData main = 2;
+    repeated WeatherData weather = 3;
+    string dt_txt = 4;
+    WindData wind = 5;
+}
+
 message Reading {
     City city = 1;
     uint32 time = 2;
+    repeated Data data = 3;
 }
 
 message City {
