@@ -11,15 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""The Python implementation of the GRPC meterology.Greeter client."""
+"""The Python implementation of the GRPC meteorology.Greeter client."""
 
 from __future__ import print_function
 import logging
 
 import grpc
 import tqdm
-from proto import meterology_pb2_grpc
-from load import load, transform
+from proto import meteorology_pb2_grpc
+from load import load
 
 
 class Transmision:
@@ -30,27 +30,41 @@ class Transmision:
         self.created = 0
         self.repeated = 0
         self.rejected = 0
+        self.transferred = 0
+        self.received = 0
+
+    def add_received(self, size):
+        self.received += size
 
     def report(self):
         status_tmpl = ('{0.created} items created, '
                        '{0.repeated} repeated, '
-                       '{0.rejected} rejected.')
+                       '{0.rejected} rejected.'
+                       ' {0.transferred}'
+                       ' of {0.received}')
         self.process.update(1)
         self.process.set_description(status_tmpl.format(self))
 
+    @classmethod
+    def handle_rpc_error(self, error):
+        code = error.code()
+        if code == grpc.StatusCode.ALREADY_EXISTS:
+            self.repeated += 1
+        elif code == grpc.StatusCode.FAILED_PRECONDITION:
+            self.rejected += 1
+        else:
+            details = error.details()
+            report = 'SendReading failed with {0}: {1}'
+            raise Exception(report.format(code, details))
+
     def send(self, item):
         try:
-            stub = meterology_pb2_grpc.GreeterStub(self.channel)
-            stub.GetPoI(item)
+            stub = meteorology_pb2_grpc.StationStub(self.channel)
+            stub.Report(item)
             self.created += 1
-        except grpc.RpcError as e:
-            if e.code() == grpc.StatusCode.ALREADY_EXISTS:
-                self.repeated += 1
-            elif e.code() == grpc.StatusCode.FAILED_PRECONDITION:
-                self.rejected += 1
-            else:
-                print('SendReading failed with {0}: {1}'.format(e.code(), e.details()))
-                raise e
+            self.transferred += item.ByteSize()
+        except grpc.RpcError as error:
+            self.handle_rpc_error(error)
         finally:
             self.report()
 
@@ -59,11 +73,12 @@ def run():
     # NOTE(gRPC Python Team): .close() is possible on a channel and should be
     # used in circumstances in which the with statement does not fit the needs
     # of the code.
-    source = transform(load('hourly_16.json'))
-    with grpc.insecure_channel('localhost:50051') as channel:
+    source = load('hourly_16.json.gz')
+    with grpc.insecure_channel('localhost:8000') as channel:
         transmision = Transmision(channel)
-        for meterology in source:
-            transmision.send(meterology)
+        for reading, original_size in source:
+            transmision.add_received(original_size)
+            transmision.send(reading)
 
 
 if __name__ == '__main__':

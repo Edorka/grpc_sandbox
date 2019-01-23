@@ -1,9 +1,9 @@
-from proto.meteorology_pb2 import Reading, City, Coordinates
+from proto.meteorology_pb2 import Reading
 from google.protobuf import json_format
 import gzip
 
 
-def to_object(item):
+def as_reading(item):
     try:
         result = Reading()
         return json_format.Parse(item, result, ignore_unknown_fields=True)
@@ -15,16 +15,13 @@ def to_object(item):
         return []
 
 
-def load(filepath, field='data'):
-    with open(filepath) as source:
+def load(filepath):
+    with gzip.open('hourly_16.json.gz') as source:
         for line in source:
-            yield line
+            yield as_reading(line), len(line)
 
 
 if __name__ == '__main__':
-    with gzip.open('hourly_16.json.gz') as source:
-        for reading in source:
-            result = to_object(reading)
-            print(result)
-
-    # transform(load('hourly_16.json.gz', field='features'))
+    for reading_string in load('hourly_16.json.gz'):
+        result = as_reading(reading_string)
+        print(result)

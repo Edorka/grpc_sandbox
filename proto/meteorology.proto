@@ -35,14 +35,29 @@ message WeatherData {
     string icon = 4;
 }
 
+//Data for the current reading
 message Data {
     //Moment of the reading
     uint32 dt = 1;
-    //Content
+    //Main data content
     MainData main = 2;
+    //Sucesive weather values 
     repeated WeatherData weather = 3;
+    //Reading moment  as text
     string dt_txt = 4;
+    //Value of the wind
     WindData wind = 5;
+}
+
+message City {
+    //Unique identifier for the city
+    uint32 id = 1;
+    //City name
+    string name = 2;
+    //Country code
+    string country = 3;
+    //Coordinates to the city centre
+    Coordinates coords = 4;
 }
 
 message Reading {
@@ -51,9 +66,15 @@ message Reading {
     repeated Data data = 3;
 }
 
-message City {
-    uint32 id = 1;
-    string name = 2;
-    string country = 3;
-    Coordinates coords = 4;
+message ConfirmationMessage {
+ string value = 1;
+}
+
+service Station {
+  rpc Report(meteorology.Reading) returns (ConfirmationMessage) {
+    option (google.api.http) = {
+      post: "/v1/report"
+      body: "*"
+    };
+  }
 }
