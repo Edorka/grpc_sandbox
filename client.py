@@ -19,7 +19,7 @@ import logging
 import grpc
 import tqdm
 from proto import meteorology_pb2_grpc
-from load import load
+from load import load, as_reading
 
 
 class Transmision:
@@ -76,8 +76,10 @@ def run():
     source = load('hourly_16.json.gz')
     with grpc.insecure_channel('localhost:8000') as channel:
         transmision = Transmision(channel)
-        for reading, original_size in source:
+        for reading_string in source:
+            original_size = len(reading_string)
             transmision.add_received(original_size)
+            reading = as_reading(reading_string)
             transmision.send(reading)
 
 
