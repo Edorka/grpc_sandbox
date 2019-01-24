@@ -35,6 +35,10 @@ message WeatherData {
     string icon = 4;
 }
 
+message SysData {
+    string pod = 1;
+}
+
 //Data for the current reading
 message Data {
     //Moment of the reading
@@ -47,6 +51,10 @@ message Data {
     string dt_txt = 4;
     //Value of the wind
     WindData wind = 5;
+    map<string, float> rain = 6;
+    map<string, float> clouds = 7;
+    map<string, float> snow = 8;
+    SysData sys = 9;
 }
 
 message City {
@@ -57,7 +65,7 @@ message City {
     //Country code
     string country = 3;
     //Coordinates to the city centre
-    Coordinates coords = 4;
+    Coordinates coord = 4;
 }
 
 message Reading {
