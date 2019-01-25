@@ -1,21 +1,7 @@
-# Copyright 2015 gRPC authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# Based on the GRPC python client exampple
 """The Python implementation of the GRPC meteorology.Greeter client."""
 
-from __future__ import print_function
 import logging
-
 import grpc
 import tqdm
 from proto import meteorology_pb2_grpc
@@ -51,7 +37,6 @@ class Transmision:
                                          json_size=json_size)
         self.process.set_description(description)
 
-    @classmethod
     def handle_rpc_error(self, error):
         code = error.code()
         if code == grpc.StatusCode.ALREADY_EXISTS:
@@ -63,12 +48,12 @@ class Transmision:
             report = 'SendReading failed with {0}: {1}'
             raise Exception(report.format(code, details))
 
-    def send(self, item):
+    def send(self, reading):
         try:
             stub = meteorology_pb2_grpc.StationStub(self.channel)
-            stub.Report(item)
+            stub.Report(reading)
             self.created += 1
-            self.transferred += item.ByteSize()
+            self.transferred += reading.ByteSize()
         except grpc.RpcError as error:
             self.handle_rpc_error(error)
         finally:
