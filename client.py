@@ -20,6 +20,7 @@ import grpc
 import tqdm
 from proto import meteorology_pb2_grpc
 from load import load, as_reading
+from size import bytes_to_human
 
 
 class Transmision:
@@ -40,10 +41,15 @@ class Transmision:
         status_tmpl = ('{0.created} items created, '
                        '{0.repeated} repeated, '
                        '{0.rejected} rejected.'
-                       ' {0.transferred}'
-                       ' of {0.received}')
+                       ' pb size: {pb_size}'
+                       ' from {json_size} json size')
         self.process.update(1)
-        self.process.set_description(status_tmpl.format(self))
+        pb_size = bytes_to_human(self.transferred)
+        json_size = bytes_to_human(self.received)
+        description = status_tmpl.format(self,
+                                         pb_size=pb_size,
+                                         json_size=json_size)
+        self.process.set_description(description)
 
     @classmethod
     def handle_rpc_error(self, error):
