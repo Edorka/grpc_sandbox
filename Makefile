@@ -12,13 +12,13 @@ gw:
 		--plugin=protoc-gen-grpc-gateway=$(GOPATH)/bin/protoc-gen-grpc-gateway \
 		--go_out=plugins=grpc:. \
         --grpc-gateway_out=logtostderr=true:. \
-        proto/service.proto
+        proto/meteorology.proto
 
 api:
 	protoc $(GATEWAY_FLAGS) \
 		--plugin=protoc-gen-swagger=$(GOPATH)/bin/protoc-gen-swagger \
 		--swagger_out=logtostderr=true:. \
-        proto/service.proto
+        proto/meteorology.proto
 
 
 deps:
