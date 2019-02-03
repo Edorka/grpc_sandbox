@@ -1,0 +1,88 @@
+syntax = "proto3";
+
+import "google/api/annotations.proto";
+
+package meteorology;
+
+// A point in the map
+message Coordinates {
+    // Latitude
+    double lat = 1;
+    // Longitude
+    double lon = 2;
+}
+
+message MainData {
+    float temp = 1;
+    float temp_min = 2;
+    float temp_max = 3;
+    float pressure = 4;
+    float sea_level = 5;
+    float grnd_level = 6;
+    float humidity = 7;
+    float temp_kf = 8;
+}
+
+message WindData {
+    float speed = 1;
+    float deg = 2;
+}
+
+message WeatherData {
+    int32 id = 1;
+    string main = 2;
+    string description = 3;
+    string icon = 4;
+}
+
+message SysData {
+    string pod = 1;
+}
+
+//Data for the current reading
+message Data {
+    //Moment of the reading
+    uint32 dt = 1;
+    //Main data content
+    MainData main = 2;
+    //Sucesive weather values 
+    repeated WeatherData weather = 3;
+    //Reading moment  as text
+    string dt_txt = 4;
+    //Value of the wind
+    WindData wind = 5;
+    map<string, float> rain = 6;
+    map<string, float> clouds = 7;
+    map<string, float> snow = 8;
+    SysData sys = 9;
+}
+
+message City {
+    //Unique identifier for the city
+    uint32 id = 1;
+    //City name
+    string name = 2;
+    //Country code
+    string country = 3;
+    //Coordinates to the city centre
+    Coordinates coord = 4;
+}
+
+message Reading {
+    City city = 1;
+    uint32 time = 2;
+    repeated Data data = 3;
+}
+
+message ConfirmationMessage {
+ string value = 1;
+}
+
+service Station {
+  rpc Report(meteorology.Reading) returns (ConfirmationMessage) {
+    option (google.api.http) = {
+      post: "/v1/report"
+      body: "*"
+    };
+  }
+}
